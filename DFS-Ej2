@@ -1,0 +1,71 @@
+def pos_bloqueada_en_fila(fila, col, A):
+    return fila < len(A) and col == A[fila]
+
+def es_seguro(tablero, fila, col):
+    for i in range(fila):
+        if tablero[i] == col or abs(tablero[i] - col) == abs(i - fila):
+            return False
+    return True
+
+def backtrack(N, A, fila, tablero, soluciones, todas):
+    if fila == N:
+        soluciones.append(tablero[:])
+        return not todas  
+
+    for col in range(N):
+        if pos_bloqueada_en_fila(fila, col, A):
+            continue
+        if es_seguro(tablero, fila, col):
+            tablero[fila] = col
+            if backtrack(N, A, fila + 1, tablero, soluciones, todas):
+                return True
+            tablero[fila] = -1
+    return False
+
+def nreinas2(N, A, todas=False):
+    tablero = [-1]*N
+    soluciones = []
+    backtrack(N, A, 0, tablero, soluciones, todas)
+    if todas:
+        return soluciones
+    return soluciones[0] if soluciones else None
+
+def dibujar_tablero(sol, N, A):
+
+    if sol is None:
+        print("Sin solución.")
+        return
+    print()
+    for i in range(N):
+        fila_str = []
+        for j in range(N):
+            if i < len(A) and j == A[i]:
+                fila_str.append("X")
+            elif sol[i] == j:
+                fila_str.append("Q")
+            else:
+                fila_str.append(".")
+        print(" ".join(fila_str))
+    print()
+
+if __name__ == "__main__":
+    print("=== Problema de las N Reinas con posiciones no disponibles ===")
+    N = int(input("Ingrese el tamaño del tablero (1 ≤ N ≤ 8): ").strip())
+    entrada = input("Ingrese las posiciones NO disponibles por fila, separadas por comas (ej: 1,3,0,2): ").strip()
+
+    A = [] if entrada == "" else list(map(int, entrada.split(",")))
+    modo_todas = input("¿Desea ver TODAS las soluciones posibles? (s/n): ").strip().lower() == "s"
+
+    resultado = nreinas2(N, A, todas=modo_todas)
+
+    if not resultado:
+        print("No se encontró ninguna solución posible.")
+    else:
+        if modo_todas:
+            print(f"\nSe encontraron {len(resultado)} soluciones:")
+            for idx, sol in enumerate(resultado, 1):
+                print(f"{idx}. {sol}")
+                dibujar_tablero(sol, N, A)
+        else:
+            print(f"\nUna posible solución es: {resultado}")
+            dibujar_tablero(resultado, N, A)
